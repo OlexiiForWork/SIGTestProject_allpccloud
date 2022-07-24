@@ -20,6 +20,8 @@
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <HLRBRep_HLRToShape.hxx>
 #include <STEPControl_Writer.hxx>
+#include <BRep_TEdge.hxx>
+#include <Geom2d_BSplineCurve.hxx>
 
 // Prototypes
 void shape_bounding_box(TopoDS_Shape &s, double &xmin, double &xmax, double &ymin, double &ymax, double &zmin, double &zmax);
@@ -118,49 +120,112 @@ int main(int argc, char **argv)
     TopoDS_Shape IsoLineHCompound =
         aHLRToShape.IsoLineHCompound();
 
+    if (VCompound.ShapeType() == TopAbs_ShapeEnum::TopAbs_COMPOUND)
+    {
+        std::cout << "VCompound.NbChildren:" << VCompound.NbChildren() <<std::endl;
 
-    STEPControl_Writer writerVCompound;
-    writerVCompound.Transfer(VCompound, STEPControl_GeometricCurveSet);
-    writerVCompound.Write("VCompound.stp");
+        
+        int  exp_int = 0, iter_int = 0;
+        for (TopExp_Explorer exp(VCompound, TopAbs_ShapeEnum::TopAbs_EDGE);exp.More();exp.Next())
+        {
+            TopoDS_Edge aCurrentEdge = TopoDS::Edge(exp.Current());
+            // do whatever with this edge
+            Handle(BRep_TEdge) brep_TEdge = Handle(BRep_TEdge)::DownCast(aCurrentEdge.TShape());
 
-    STEPControl_Writer writerRg1LineVCompound;
-    writerRg1LineVCompound.Transfer(Rg1LineVCompound, STEPControl_GeometricCurveSet);
-    writerRg1LineVCompound.Write("Rg1LineVCompound.stp");
+            if (brep_TEdge.IsNull() == false)
+            {
+                BRep_ListOfCurveRepresentation curvesList = brep_TEdge->Curves();
+                for (BRep_ListIteratorOfListOfCurveRepresentation iter(curvesList);iter.More();iter.Next())
+                {
+                    Handle(BRep_CurveRepresentation) curveRepr = iter.Value();
+                    
+                    
+                    std::cout << "IsCurveOnSurface:" << curveRepr->IsCurveOnSurface() << std::endl;
+                    std::cout << "IsPolygonOnClosedSurface:" << curveRepr->IsPolygonOnClosedSurface() << std::endl;
+                    std::cout << "IsPolygonOnSurface:" << curveRepr->IsPolygonOnSurface() << std::endl;
+                    std::cout << "IsPolygonOnClosedTriangulation:" << curveRepr->IsPolygonOnClosedTriangulation() << std::endl;
+                    std::cout << "IsPolygonOnTriangulation:" << curveRepr->IsPolygonOnTriangulation() << std::endl;
+                    std::cout << "IsCurve3D:" << curveRepr->IsCurve3D() << std::endl;
+                    std::cout << "IsRegularity:" << curveRepr->IsRegularity() << std::endl;
+                    std::cout << "IsCurveOnClosedSurface:" << curveRepr->IsCurveOnClosedSurface() << std::endl;
+                    std::cout << "IsPolygon3D:" << curveRepr->IsPolygon3D() << std::endl;
+
+                    if (curveRepr->IsCurveOnSurface())
+                    {
+                        Handle(Geom2d_Curve) curve = curveRepr->PCurve();
+                        if (curve.IsNull() == false)
+                        {
+                            std::cout << "              curve" <<  std::endl;
+                            std::cout << "              curve:" << curve->GetRefCount() <<std::endl;
+                            std::cout << "              curve:" << curve->DynamicType() << std::endl;
+                            std::cout<< "               curve->DynamicType()->Name():"<< curve->DynamicType()->Name() << std::endl;
+                            std::cout << "              curve:" << curve->get_type_descriptor() << std::endl;
+                            std::cout << "              curve:" << curve->get_type_name() << std::endl;
+
+                            TCollection_AsciiString str("Geom2d_BSplineCurve");
+                            if (str.Search(curve->DynamicType()->Name())>-1)
+                            {
+                                Handle(Geom2d_BSplineCurve) bSplineCurve = Handle(Geom2d_BSplineCurve)::DownCast(curve);
+
+                                std::cout << "      !!!!Geom2d_BSplineCurve" << std::endl;
+                            }
+
+                        }
+                    }
+
+                }
+                std::cout << "----------------------" <<  std::endl;
+                exp_int++;
+            }
+            
+        }
+
+        std::cout << "exp_int:" << exp_int << std::endl;
+    }
+
+    //STEPControl_Writer writerVCompound;
+    //writerVCompound.Transfer(VCompound, STEPControl_GeometricCurveSet);
+    //writerVCompound.Write("VCompound.stp");
+
+    //STEPControl_Writer writerRg1LineVCompound;
+    //writerRg1LineVCompound.Transfer(Rg1LineVCompound, STEPControl_GeometricCurveSet);
+    //writerRg1LineVCompound.Write("Rg1LineVCompound.stp");
+
+    //STEPControl_Writer writerRgNLineVCompound;
+    //writerRgNLineVCompound.Transfer(RgNLineVCompound, STEPControl_GeometricCurveSet);
+    //writerRgNLineVCompound.Write("RgNLineVCompound.stp");
+
+    //STEPControl_Writer writerOutLineVCompound;
+    //writerOutLineVCompound.Transfer(OutLineVCompound, STEPControl_GeometricCurveSet);
+    // writerOutLineVCompound.Write("OutLineVCompound.stp");
+
+    //STEPControl_Writer writerIsoLineVCompound;
+    //writerIsoLineVCompound.Transfer(IsoLineVCompound, STEPControl_GeometricCurveSet);
+    //writerIsoLineVCompound.Write("IsoLineVCompound.stp");
 
 
-    STEPControl_Writer writerRgNLineVCompound;
-    writerRgNLineVCompound.Transfer(RgNLineVCompound, STEPControl_GeometricCurveSet);
-    writerRgNLineVCompound.Write("RgNLineVCompound.stp");
+    //STEPControl_Writer writerHCompound;
+    //writerHCompound.Transfer(HCompound, STEPControl_GeometricCurveSet);
+    //writerHCompound.Write("HCompound.stp");
 
-    STEPControl_Writer writerOutLineVCompound;
-    writerOutLineVCompound.Transfer(OutLineVCompound, STEPControl_GeometricCurveSet);
-     writerOutLineVCompound.Write("OutLineVCompound.stp");
-
-    STEPControl_Writer writerIsoLineVCompound;
-    writerIsoLineVCompound.Transfer(IsoLineVCompound, STEPControl_GeometricCurveSet);
-    writerIsoLineVCompound.Write("IsoLineVCompound.stp");
+    //STEPControl_Writer writerRg1LineHCompound;
+    //writerRg1LineHCompound.Transfer(Rg1LineHCompound, STEPControl_GeometricCurveSet);
+    //writerRg1LineHCompound.Write("Rg1LineHCompound.stp");
 
 
-    STEPControl_Writer writerHCompound;
-    writerHCompound.Transfer(HCompound, STEPControl_GeometricCurveSet);
-    writerHCompound.Write("HCompound.stp");
+    //STEPControl_Writer writerRgNLineHCompound;
+    //writerRgNLineHCompound.Transfer(RgNLineHCompound, STEPControl_GeometricCurveSet);
+    //writerRgNLineHCompound.Write("RgNLineHCompound.stp");
 
-    STEPControl_Writer writerRg1LineHCompound;
-    writerRg1LineHCompound.Transfer(Rg1LineHCompound, STEPControl_GeometricCurveSet);
-    writerRg1LineHCompound.Write("Rg1LineHCompound.stp");
+    //STEPControl_Writer writerOutLineHCompound;
+    //writerOutLineHCompound.Transfer(OutLineHCompound, STEPControl_GeometricCurveSet);
+    //writerOutLineHCompound.Write("OutLineHCompound.stp");
+
+    //STEPControl_Writer writerIsoLineHCompound;
+    //writerIsoLineHCompound.Transfer(IsoLineHCompound, STEPControl_GeometricCurveSet);
+    //writerIsoLineHCompound.Write("IsoLineHCompound.stp");
 
 
-    STEPControl_Writer writerRgNLineHCompound;
-    writerRgNLineHCompound.Transfer(RgNLineHCompound, STEPControl_GeometricCurveSet);
-    writerRgNLineHCompound.Write("RgNLineHCompound.stp");
-
-    STEPControl_Writer writerOutLineHCompound;
-    writerOutLineHCompound.Transfer(OutLineHCompound, STEPControl_GeometricCurveSet);
-    writerOutLineHCompound.Write("OutLineHCompound.stp");
-
-    STEPControl_Writer writerIsoLineHCompound;
-    writerIsoLineHCompound.Transfer(IsoLineHCompound, STEPControl_GeometricCurveSet);
-    writerIsoLineHCompound.Write("IsoLineHCompound.stp");
     /*
      *
      * Please insert here source code for the test project.
