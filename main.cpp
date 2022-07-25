@@ -124,8 +124,6 @@ int main(int argc, char **argv)
     {
         std::cout << "VCompound.NbChildren:" << VCompound.NbChildren() <<std::endl;
 
-        
-        int  exp_int = 0, iter_int = 0;
         for (TopExp_Explorer exp(VCompound, TopAbs_ShapeEnum::TopAbs_EDGE);exp.More();exp.Next())
         {
             TopoDS_Edge aCurrentEdge = TopoDS::Edge(exp.Current());
@@ -158,7 +156,7 @@ int main(int argc, char **argv)
                             std::cout << "              curve" <<  std::endl;
                             std::cout << "              curve:" << curve->GetRefCount() <<std::endl;
                             std::cout << "              curve:" << curve->DynamicType() << std::endl;
-                            std::cout<< "               curve->DynamicType()->Name():"<< curve->DynamicType()->Name() << std::endl;
+                            std::cout << "              curve->DynamicType()->Name():"<< curve->DynamicType()->Name() << std::endl;
                             std::cout << "              curve:" << curve->get_type_descriptor() << std::endl;
                             std::cout << "              curve:" << curve->get_type_name() << std::endl;
 
@@ -166,8 +164,50 @@ int main(int argc, char **argv)
                             if (str.Search(curve->DynamicType()->Name())>-1)
                             {
                                 Handle(Geom2d_BSplineCurve) bSplineCurve = Handle(Geom2d_BSplineCurve)::DownCast(curve);
+                                std::cout << "             !!!!Geom2d_BSplineCurve" << std::endl;
 
-                                std::cout << "      !!!!Geom2d_BSplineCurve" << std::endl;
+                                Standard_Real UStart = bSplineCurve->FirstParameter();
+                                Standard_Real ULast  = bSplineCurve->LastParameter();
+                                std::cout << "             UStart:" << UStart << " ULast:" << ULast << std::endl;
+
+                                Standard_Integer UKnotFirstIndex = bSplineCurve->FirstUKnotIndex();
+                                Standard_Integer UKnotLastIndex = bSplineCurve->LastUKnotIndex();
+                                std::cout << "             UKnotFirstIndex:" << UKnotFirstIndex << " UKnotLastIndex:" << UKnotLastIndex << std::endl;
+                                
+                                Standard_Integer NbKnots = bSplineCurve->NbKnots();
+                                Standard_Integer NbPoles = bSplineCurve->NbPoles();
+                                std::cout << "             NbKnots:" << NbKnots << " NbPoles:" << NbPoles << std::endl;
+                                std::cout << std::endl;
+
+                                gp_Pnt2d P0;
+                                gp_Vec2d V;
+                                Standard_Real U = UStart;
+                                std::cout << "----------------------------" << std::endl;
+                                bSplineCurve->D0(U, P0);
+                                std::cout << "             D0 U:" << U << " PX:" << P0.X() << " PY:" << P0.Y() << std::endl;
+          
+                                bSplineCurve->D1(U, P0, V);
+                                std::cout << "             D1 U:" << U << " PX:" << P0.X() << " PY:" << P0.Y() << std::endl;
+                                std::cout << "                VX:" << V.X() << " VY:" << V.Y() << std::endl;
+                                std::cout << "----------------------------" << std::endl;
+                                
+                                U = (ULast - UStart)/2 + UStart + 0.025;
+                                bSplineCurve->D0(U, P0);
+                                std::cout << "             D0 U:" << U << " PX:" << P0.X() << " PY:" << P0.Y() << std::endl;
+
+                                bSplineCurve->D1(U, P0, V);
+                                std::cout << "             D1 U:" << U << " PX:" << P0.X() << " PY:" << P0.Y() << std::endl;
+                                std::cout << "                VX:" << V.X() << " VY:" << V.Y() << std::endl;
+                                std::cout << "----------------------------" << std::endl;
+                                
+                                U = ULast;
+                                bSplineCurve->D0(U, P0);
+                                std::cout << "             D0 U:" << U << " PX:" << P0.X() << " PY:" << P0.Y() << std::endl;
+
+                                bSplineCurve->D1(U, P0, V);
+                                std::cout << "             D1 U:" << U << " PX:" << P0.X() << " PY:" << P0.Y() << std::endl;
+                                std::cout << "                VX:" << V.X() << " VY:" << V.Y() << std::endl;
+                                std::cout << "----------------------------" << std::endl;
                             }
 
                         }
@@ -175,12 +215,9 @@ int main(int argc, char **argv)
 
                 }
                 std::cout << "----------------------" <<  std::endl;
-                exp_int++;
             }
             
         }
-
-        std::cout << "exp_int:" << exp_int << std::endl;
     }
 
     //STEPControl_Writer writerVCompound;
