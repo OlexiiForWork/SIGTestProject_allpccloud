@@ -23,6 +23,9 @@
 #include <BRep_TEdge.hxx>
 #include <Geom2d_BSplineCurve.hxx>
 
+////libdxf header files
+//#include <spline.h>
+
 // Prototypes
 void shape_bounding_box(TopoDS_Shape &s, double &xmin, double &xmax, double &ymin, double &ymax, double &zmin, double &zmax);
 
@@ -123,6 +126,14 @@ int main(int argc, char **argv)
     if (VCompound.ShapeType() == TopAbs_ShapeEnum::TopAbs_COMPOUND)
     {
         std::cout << "VCompound.NbChildren:" << VCompound.NbChildren() <<std::endl;
+        ////--------------------------------------
+        //DxfFile fil = dxf_file_struct();
+        //char s[14];
+        //strcpy(s, "Test_file.dxf");
+        //fil.fp = fopen(s, "w+");
+        //fil.filename = s;
+        ////--------------------------------------
+
 
         for (TopExp_Explorer exp(VCompound, TopAbs_ShapeEnum::TopAbs_EDGE);exp.More();exp.Next())
         {
@@ -208,6 +219,12 @@ int main(int argc, char **argv)
                                 std::cout << "             D1 U:" << U << " PX:" << P0.X() << " PY:" << P0.Y() << std::endl;
                                 std::cout << "                VX:" << V.X() << " VY:" << V.Y() << std::endl;
                                 std::cout << "----------------------------" << std::endl;
+
+                                //DxfSpline* spline = dxf_spline_new();
+
+                                //DxfPoint* point = dxf_point_new();
+
+                                //dxf_spline_write(&fil, spline);
                             }
 
                         }
@@ -218,6 +235,7 @@ int main(int argc, char **argv)
             }
             
         }
+        //dxf_file_write_eof(fil);
     }
 
     //STEPControl_Writer writerVCompound;
